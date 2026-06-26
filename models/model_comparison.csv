@@ -1,0 +1,3 @@
+Model,Accuracy,ROC_AUC,Not_Fit_F1,Fit_F1
+Logistic Regression,65.7,0.711,0.69,0.62
+Random Forest,65.8,0.706,0.67,0.64

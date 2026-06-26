@@ -1,0 +1,9 @@
+venv/
+.env
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.vscode/
+data/resume_data.csv
+data/resume_data_cleaned.csv
+data/resume_data_featured.csv
