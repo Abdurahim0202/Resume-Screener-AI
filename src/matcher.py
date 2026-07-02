@@ -3,16 +3,24 @@ import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def clean_text(text, nlp):
+STOPWORDS = {
+    'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+    'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been',
+    'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+    'should', 'may', 'might', 'shall', 'can', 'need', 'this', 'that',
+    'these', 'those', 'it', 'its', 'as', 'if', 'up', 'out', 'about',
+    'into', 'through', 'during', 'not', 'no', 'so', 'than', 'too', 'very',
+    'just', 'also', 'both', 'each', 'more', 'most', 'other', 'such', 'own'
+}
+
+def clean_text(text, nlp=None):
     if not isinstance(text, str) or text.strip() == '':
         return ''
     text = re.sub(r"[\[\]'\"{}]", ' ', text)
     text = text.lower()
     text = re.sub(r'[^a-zA-Z\s,]', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
-    doc = nlp(text)
-    tokens = [token.text for token in doc
-              if not token.is_stop and not token.is_punct and len(token.text) > 1]
+    tokens = [w for w in text.split() if w not in STOPWORDS and len(w) > 1]
     return ' '.join(tokens)
 
 

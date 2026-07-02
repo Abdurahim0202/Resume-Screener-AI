@@ -22,7 +22,6 @@ from src.matcher import build_features
 
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import spacy
 
 # ─── Load models ───────────────────────────────────────────────────────────────
 @st.cache_resource
@@ -30,11 +29,10 @@ def load_models():
     rf_model = joblib.load('models/random_forest.pkl')
     scaler = joblib.load('models/scaler.pkl')
     explainer = joblib.load('models/shap_explainer.pkl')
-    nlp = spacy.load('en_core_web_sm')
     sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
-    return rf_model, scaler, explainer, nlp, sentence_model
+    return rf_model, scaler, explainer, sentence_model
 
-rf_model, scaler, explainer, nlp, sentence_model = load_models()
+rf_model, scaler, explainer, sentence_model = load_models()
 
 # ─── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -298,7 +296,7 @@ else:  # Bulk Screening mode
             for i, file in enumerate(uploaded_files):
                 pdf_bytes = file.read()
                 r_data = parse_resume(pdf_bytes)
-                feats, _ = build_features(r_data, jd_data, nlp, sentence_model)
+                feats, _ = build_features(resume_data, jd_data, None, sentence_model)
                 prob = rf_model.predict_proba(feats)[0][1]
                 score = round(prob * 100, 1)
 
