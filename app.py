@@ -423,7 +423,7 @@ if analyze_btn:
         with st.spinner("Analyzing resume..."):
 
             # ── Build features (shared logic lives in src/matcher.py) ──
-            features, extras = build_features(resume_data, jd_data, nlp, sentence_model)
+            features, extras = build_features(resume_data, jd_data, None, sentence_model)
 
             domain_alignment   = extras['domain_alignment']
             full_text_sim       = extras['full_text_sim']
