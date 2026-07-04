@@ -7,3 +7,5 @@ __pycache__/
 data/resume_data.csv
 data/resume_data_cleaned.csv
 data/resume_data_featured.csv
+
+models/distilbert_resume_screener/
