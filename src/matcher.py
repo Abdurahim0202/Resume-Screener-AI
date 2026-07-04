@@ -151,15 +151,14 @@ def build_features(resume_data, jd_data, nlp, sentence_model):
     Given parsed resume_data and jd_data, compute the full 8-feature vector.
     Returns (features_df, intermediate_values_dict)
     """
-    resume_text = clean_text(resume_data['full_text'], nlp)
+    resume_text = clean_text(resume_data['full_text'])
     job_text = clean_text(
         jd_data['title'] + ' ' +
         ' '.join(jd_data['required_skills']) + ' ' +
         ' '.join(jd_data.get('programming_languages', [])) + ' ' +
         ' '.join(jd_data.get('frameworks_tools', [])) + ' ' +
         jd_data['responsibilities'] + ' ' +
-        jd_data['full_text'],
-        nlp
+        jd_data['full_text']
     )
 
     domain_alignment = compute_multilabel_alignment(resume_text, job_text)
