@@ -1,12 +1,1 @@
-streamlit
-pandas
-numpy
-scikit-learn
-sentence-transformers
-shap
-matplotlib
-seaborn
-joblib
-pymupdf
-groq
-python-dotenv
+Set-Content requirements.txt "streamlit`npandas`nnumpy`nscikit-learn`nsentence-transformers`nshap`nmatplotlib`nseaborn`njoblib`npymupdf`ngroq`npython-dotenv`ntransformers`ntorch"

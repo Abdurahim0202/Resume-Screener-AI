@@ -30,9 +30,14 @@ def load_models():
     scaler = joblib.load('models/scaler.pkl')
     explainer = joblib.load('models/shap_explainer.pkl')
     sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
-    return rf_model, scaler, explainer, sentence_model
+    
+    # Load DistilBERT
+    from src.distilbert_scorer import load_distilbert
+    distilbert_model, distilbert_tokenizer, distilbert_device = load_distilbert()
+    
+    return rf_model, scaler, explainer, sentence_model, distilbert_model, distilbert_tokenizer, distilbert_device
 
-rf_model, scaler, explainer, sentence_model = load_models()
+rf_model, scaler, explainer, sentence_model, distilbert_model, distilbert_tokenizer, distilbert_device = load_models()
 
 # ─── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -297,7 +302,15 @@ else:  # Bulk Screening mode
                 pdf_bytes = file.read()
                 r_data = parse_resume(pdf_bytes)
                 feats, _ = build_features(resume_data, jd_data, None, sentence_model)
-                prob = rf_model.predict_proba(feats)[0][1]
+                distilbert_prob = predict_with_distilbert(
+                    r_data['full_text'],
+                    jd_data['full_text'],
+                    distilbert_model,
+                    distilbert_tokenizer,
+                    distilbert_device
+                )
+                rf_prob = rf_model.predict_proba(feats)[0][1]
+                prob = (distilbert_prob * 0.70) + (rf_prob * 0.30)
                 score = round(prob * 100, 1)
 
                 results.append({
@@ -431,8 +444,22 @@ if analyze_btn:
             overlap_pct          = extras['overlap_pct']
             has_certification     = extras['has_certification']
 
-            probability = rf_model.predict_proba(features)[0][1]
-            score_pct   = round(probability * 100, 1)
+            # DistilBERT as primary scorer
+            from src.distilbert_scorer import predict_with_distilbert
+            distilbert_prob = predict_with_distilbert(
+                resume_data['full_text'],
+                jd_data['full_text'],
+                distilbert_model,
+                distilbert_tokenizer,
+                distilbert_device
+            )
+
+            # Random Forest as secondary signal
+            rf_prob = rf_model.predict_proba(features)[0][1]
+
+            # Weighted ensemble: 70% DistilBERT + 30% Random Forest
+            probability = (distilbert_prob * 0.70) + (rf_prob * 0.30)
+            score_pct = round(probability * 100, 1)
 
             # ── Results ──
             st.divider()
@@ -504,14 +531,24 @@ if analyze_btn:
                 resume_skills_lower = [s.lower() for s in resume_data['skills_keywords']]
                 if jd_data['required_skills']:
                     st.markdown("**Required Skills Match:**")
+                    resume_text_lower = resume_data['full_text'].lower()
+                    resume_skills_lower = [s.lower() for s in resume_data['skills_keywords']]
                     for skill in jd_data['required_skills']:
-                        match = "✅" if skill.lower() in resume_skills_lower else "❌"
+                        skill_lower = skill.lower()
+                        # Check multiple ways: exact skill list match, partial word match in full text
+                        skill_words = [w for w in skill_lower.split() if len(w) > 3]
+                        exact_match = skill_lower in resume_skills_lower
+                        partial_match = any(word in resume_text_lower for word in skill_words)
+                        match = "✅" if exact_match or partial_match else "❌"
                         st.markdown(f"{match} {skill}")
-
                 if jd_data.get('preferred_skills'):
                     st.markdown("**Preferred Skills Match:**")
                     for skill in jd_data['preferred_skills']:
-                        match = "✅" if skill.lower() in resume_skills_lower else "❌"
+                        skill_lower = skill.lower()
+                        skill_words = [w for w in skill_lower.split() if len(w) > 3]
+                        exact_match = skill_lower in resume_skills_lower
+                        partial_match = any(word in resume_text_lower for word in skill_words)
+                        match = "✅" if exact_match or partial_match else "❌"
                         st.markdown(f"{match} {skill}")
 
             # ── SHAP ──
