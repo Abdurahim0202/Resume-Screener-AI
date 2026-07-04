@@ -14,7 +14,11 @@ STOPWORDS = {
 }
 
 def clean_text(text, nlp=None):
-    if not isinstance(text, str) or text.strip() == '':
+    if text is None:
+        return ''
+    if not isinstance(text, str):
+        text = str(text)
+    if text.strip() == '':
         return ''
     text = re.sub(r"[\[\]'\"{}]", ' ', text)
     text = text.lower()
@@ -22,7 +26,6 @@ def clean_text(text, nlp=None):
     text = re.sub(r'\s+', ' ', text).strip()
     tokens = [w for w in text.split() if w not in STOPWORDS and len(w) > 1]
     return ' '.join(tokens)
-
 
 DOMAIN_KEYWORDS = {
     'tech': [
