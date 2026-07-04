@@ -14,9 +14,6 @@ import re
 sys.path.append('src')
 
 from src.pdf_parser import parse_resume
-import importlib
-import src.jd_parser
-importlib.reload(src.jd_parser)
 from src.jd_parser import parse_job_description
 from src.matcher import build_features
 

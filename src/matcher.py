@@ -154,7 +154,7 @@ def build_features(resume_data, jd_data, nlp = None, sentence_model = None):
     Given parsed resume_data and jd_data, compute the full 8-feature vector.
     Returns (features_df, intermediate_values_dict)
     """
-    resume_text = clean_text(resume_data['full_text'])
+    resume_text = clean_text(resume_data.get('full_text') or '')
     job_text = clean_text(
         jd_data['title'] + ' ' +
         ' '.join(jd_data['required_skills']) + ' ' +
