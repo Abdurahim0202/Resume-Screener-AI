@@ -146,7 +146,7 @@ def compute_experience_match(position_count, required_years):
     return 0.0
 
 
-def build_features(resume_data, jd_data, nlp, sentence_model):
+def build_features(resume_data, jd_data, nlp = None, sentence_model = None):
     """
     Given parsed resume_data and jd_data, compute the full 8-feature vector.
     Returns (features_df, intermediate_values_dict)
