@@ -4,7 +4,13 @@ load_dotenv()
 from groq import Groq
 import re
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+try:
+    import streamlit as st
+    GROQ_KEY = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+except Exception:
+    GROQ_KEY = os.getenv("GROQ_API_KEY")
+
+client = Groq(api_key=GROQ_KEY)
 
 def analyze_match_with_llm(resume_text, jd_data, score_pct):
     """

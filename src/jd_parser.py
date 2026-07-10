@@ -6,11 +6,17 @@ import re
 import json
 from groq import Groq
 
+try:
+    import streamlit as st
+    GROQ_KEY = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+except Exception:
+    GROQ_KEY = os.getenv("GROQ_API_KEY")
+
 def parse_jd_with_llm(title, description):
     """
     Use Groq LLM to intelligently extract structured info from any JD format
     """
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    client = Groq(api_key=GROQ_KEY)
 
     prompt = f"""Extract structured information from this job description and return ONLY a JSON object with no extra text, no markdown, no explanation.
 
