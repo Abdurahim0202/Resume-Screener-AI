@@ -5,6 +5,7 @@ load_dotenv()
 import re
 import json
 from groq import Groq
+from src.config import GROQ_MODEL
 
 try:
     import streamlit as st
@@ -48,7 +49,7 @@ Rules:
 - Return ONLY the JSON object, nothing else"""
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=GROQ_MODEL,
         messages=[{"role": "user", "content": prompt}],
         temperature=0,
         max_tokens=1000
