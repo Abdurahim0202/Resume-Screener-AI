@@ -1,9 +1,10 @@
+from urllib import response
+
 from dotenv import load_dotenv
 import os
 load_dotenv()
 
-import re
-import json
+import json, re
 from groq import Groq
 from src.config import GROQ_MODEL
 
@@ -13,6 +14,19 @@ try:
 except Exception:
     GROQ_KEY = os.getenv("GROQ_API_KEY")
 
+
+def extract_json(text: str) -> dict:
+    text = text.strip()
+    # strip ```json ... ``` fences if present
+    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.IGNORECASE)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # fall back to the outermost {...} block
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        raise
 def parse_jd_with_llm(title, description):
     """
     Use Groq LLM to intelligently extract structured info from any JD format
@@ -48,12 +62,17 @@ Rules:
 - For seniority look for intern, junior, senior, enrolled student keywords
 - Return ONLY the JSON object, nothing else"""
 
+
     response = client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0,
-        max_tokens=1000
-    )
+    model=GROQ_MODEL,
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0.1,
+    max_tokens=3000,                              # room for reasoning + answer
+    reasoning_effort="low",                       # less thinking, fewer wasted tokens
+    response_format={"type": "json_object"},      # forces valid JSON output
+)
+    response_text = response.choices[0].message.content or ""
+    return extract_json(response_text)
 
     response_text = response.choices[0].message.content.strip()
     response_text = re.sub(r'```json\n?|\n?```', '', response_text).strip()
