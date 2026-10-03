@@ -298,7 +298,10 @@ else:  # Bulk Screening mode
             for i, file in enumerate(uploaded_files):
                 pdf_bytes = file.read()
                 r_data = parse_resume(pdf_bytes)
-                feats, _ = build_features(resume_data, jd_data, None, sentence_model)
+                if not r_data:
+                    st.warning(f"Could not parse {file.name}, skipping.")
+                    continue
+                feats, _ = build_features(r_data, jd_data, None, sentence_model)
                 distilbert_prob = predict_with_distilbert(
                     r_data['full_text'],
                     jd_data['full_text'],
